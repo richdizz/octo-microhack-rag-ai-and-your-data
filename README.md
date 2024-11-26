@@ -13,6 +13,8 @@ name: Multi-repo ChatGPT and Enterprise data with Azure OpenAI and AI Search
 description: GPT-RAG core is a Retrieval-Augmented Generation pattern running in Azure, using Azure AI Search for retrieval and Azure OpenAI large language models to power ChatGPT-style and Q&A experiences.
 -->
 <!-- YAML front-matter schema: https://review.learn.microsoft.com/en-us/help/contribute/samples/process/onboarding?branch=main#supported-metadata-fields-for-readmemd -->
+![Alt text](docs/Microhack%20OCTO%20logo.png "Microsoft Americas Office of the CTO")
+
 # Microhack - RAG AI & Your Data
 ## Presented by Microsoft Americas Office of the CTO
 Originally from [GPT-RAG](https://github.com/Azure/gpt-rag)
