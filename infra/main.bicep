@@ -676,7 +676,7 @@ module cosmosAccount './core/db/cosmos.bicep' = {
     existingCosmosDbResourceGroupName: _azureReuseConfig.existingCosmosDbResourceGroupName 
     existingCosmosDbAccountName: _azureReuseConfig.existingCosmosDbAccountName
     publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
-    location: 'Central US'
+    location: location
     conversationContainerName:  _azureDbConfig.conversationContainerName
     modelsContainerName: _azureDbConfig.modelsContainerName   
     databaseName: _azureDbConfig.dbDatabaseName
