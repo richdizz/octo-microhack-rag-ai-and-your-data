@@ -56,7 +56,7 @@ If you want to learn more about the RAG Pattern and GPT-RAG architecture.
 
 1) **Basic Architecture Deployment:** *for quick demos with no network isolation*⚙️
 
-Learn how to **quickly set up** the basic architecture for scenarios without network isolation. [Click the link to proceed](#basic-architecture-deployment).
+Learn how to **quickly set up** the basic architecture for scenarios without network isolation. [Click the link to proceed](#getting-started).
 
 
 ## Getting Started
@@ -65,14 +65,14 @@ This guide will walk you through the deployment process of Enterprise RAG. Befor
 
 **Pre-requisites**
 
-- Azure Developer CLI: [Download azd for Windows](https://azdrelease.azureedge.net/azd/standalone/release/1.5.0/azd-windows-amd64.msi), [Other OS's](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd).
+ - Azure Developer CLI: [Download azd](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd?tabs=winget-windows%2Cbrew-mac%2Cscript-linux&pivots=os-windows) 
+   - Ensure the correct OS is selected
  - Powershell 7+ with AZ module (Windows only): [Powershell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4#installing-the-msi-package), [AZ Module](https://learn.microsoft.com/en-us/powershell/azure/what-is-azure-powershell?view=azps-11.6.0#the-az-powershell-module)
  - Git: [Download Git](https://git-scm.com/downloads)
  - Node.js 16+ [windows/mac](https://nodejs.dev/en/download/)  [linux/wsl](https://nodejs.dev/en/download/package-manager/)
  - Python 3.11: [Download Python](https://www.python.org/downloads/release/python-3118/)
  - Initiate an [Azure AI services creation](https://portal.azure.com/#create/Microsoft.CognitiveServicesAllInOne) and agree to the Responsible AI terms **
-
-** If you have not created an Azure AI service resource in the subscription before
+   - ** If you have not created an Azure AI service resource in the subscription before
 
 ### Basic Architecture Deployment
 
