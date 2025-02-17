@@ -14,7 +14,7 @@ else:
     from typing_extensions import Annotated
 from azure.cognitiveservices.search.customsearch import CustomSearchClient
 from msrest.authentication import CognitiveServicesCredentials
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity.aio import ManagedIdentityCredential, AzureCliCredential, ChainedTokenCredential
 import aiohttp
 import asyncio
 
@@ -43,15 +43,13 @@ AZURE_SEARCH_USE_SEMANTIC = os.environ.get("AZURE_SEARCH_USE_SEMANTIC") or "fals
 AZURE_SEARCH_APPROACH = os.environ.get("AZURE_SEARCH_APPROACH") or "hybrid"
 AZURE_SEARCH_OYD_USE_SEMANTIC_SEARCH = os.environ.get("AZURE_SEARCH_OYD_USE_SEMANTIC_SEARCH") or "false"
 AZURE_SEARCH_OYD_USE_SEMANTIC_SEARCH = True if AZURE_SEARCH_OYD_USE_SEMANTIC_SEARCH == "true" else False
-AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG = os.environ.get("AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG") or "default"
+AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG = os.environ.get("AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG") or "my-semantic-config"
 AZURE_SEARCH_ENABLE_IN_DOMAIN = os.environ.get("AZURE_SEARCH_ENABLE_IN_DOMAIN") or "true"
 AZURE_SEARCH_ENABLE_IN_DOMAIN = True if AZURE_SEARCH_ENABLE_IN_DOMAIN == "true" else False
 AZURE_SEARCH_CONTENT_COLUMNS = os.environ.get("AZURE_SEARCH_CONTENT_COLUMNS") or "content"
 AZURE_SEARCH_FILENAME_COLUMN = os.environ.get("AZURE_SEARCH_FILENAME_COLUMN") or "filepath"
 AZURE_SEARCH_TITLE_COLUMN = os.environ.get("AZURE_SEARCH_TITLE_COLUMN") or "title"
 AZURE_SEARCH_URL_COLUMN = os.environ.get("AZURE_SEARCH_URL_COLUMN") or "url"
-AZURE_SEARCH_TRIMMING = os.environ.get("AZURE_SEARCH_TRIMMING") or "false"
-AZURE_SEARCH_TRIMMING = True if AZURE_SEARCH_TRIMMING == "true" else False
 
 # Bing Search Integration Settings
 BING_SEARCH_TOP_K = os.environ.get("BING_SEARCH_TOP_K") or "3"
@@ -74,12 +72,6 @@ logging.basicConfig(level=LOGLEVEL)
 APIM_ENABLED = os.environ.get('APIM_ENABLED', 'false').lower() == 'true'
 APIM_BING_CUSTOM_SEARCH_URL = os.environ.get('APIM_BING_CUSTOM_SEARCH_URL', "") + "/search?"
 APIM_AZURE_SEARCH_URL = os.environ.get('APIM_AZURE_SEARCH_URL', "")
-
-# Azure Key Vault Settings
-AZURE_KEY_VAULT_ENDPOINT = os.environ.get("AZURE_KEY_VAULT_ENDPOINT")
-
-# Azure Search API Key
-AZURE_SEARCH_API_KEY = os.environ.get("AZURE_SEARCH_API_KEY")
 
 @retry(wait=wait_random_exponential(min=2, max=60), stop=stop_after_attempt(6), reraise=True)
 # Function to generate embeddings for title and content fields, also used for query embeddings
@@ -111,13 +103,21 @@ class Retrieval:
         self,
         input: Annotated[str, "The user question"],
         apim_key: Annotated[str, "The key to access the apim endpoint"],
-        client_principal_id: Annotated[str, "The user client principal id"]
+        # client_principal_id: Annotated[str, "The user client principal id"]
+        security_ids: Annotated[str, "Comma separated list string with user security ids"]
     ) -> Annotated[str, "the output is a string with the search results"]:
         search_results = []
         search_query = input
-        search_filter = f"security_id/any(g:search.in(g,'{client_principal_id}'))"
+        # search_filter = f"security_id/any(g:search.in(g,'{client_principal_id}'))"
+        search_filter = (
+                            f"metadata_security_id/any(g:search.in(g, '{security_ids}')) "
+                            f"or not metadata_security_id/any()"
+                        )        
         try:
-            async with DefaultAzureCredential() as credential:
+            async with ChainedTokenCredential(
+                ManagedIdentityCredential(),
+                AzureCliCredential()
+            ) as credential:
                 start_time = time.time()
                 logging.info(f"[sk_retrieval] generating question embeddings. search query: {search_query}")
                 embeddings_query = await generate_embeddings(search_query,apim_key=apim_key)
@@ -125,7 +125,6 @@ class Retrieval:
                 logging.info(f"[sk_retrieval] finished generating question embeddings. {response_time} seconds")
                 azureSearchKey =await credential.get_token("https://search.azure.com/.default")
                 azureSearchKey = azureSearchKey.token
-                
                 logging.info(f"[sk_retrieval] querying azure ai search. search query: {search_query}")
                 # prepare body
                 body = {
@@ -154,8 +153,14 @@ class Retrieval:
                     body["queryType"] = "semantic"
                     body["semanticConfiguration"] = AZURE_SEARCH_SEMANTIC_SEARCH_CONFIG
 
-                if AZURE_SEARCH_TRIMMING:
-                    body["filter"] = search_filter
+                body["filter"] = search_filter
+
+                logging.debug(f"[ai_search] search filter: {search_filter}")
+
+                headers = {
+                    'Content-Type': 'application/json',
+                    'Authorization': f'Bearer {azureSearchKey}'
+                }                    
 
                 if APIM_ENABLED:
                     headers = {
@@ -167,8 +172,7 @@ class Retrieval:
                 else:
                     headers = {
                     'Content-Type': 'application/json',
-                    'api-key': AZURE_SEARCH_API_KEY
-                    #'Authorization': f'Bearer {azureSearchKey}'
+                    'Authorization': f'Bearer {azureSearchKey}'
                 }
                     search_endpoint = f"https://{AZURE_SEARCH_SERVICE}.search.windows.net/indexes/{AZURE_SEARCH_INDEX}/docs/search?api-version={AZURE_SEARCH_API_VERSION}"
                 start_time = time.time()

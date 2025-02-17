@@ -175,7 +175,8 @@ def chatgpt():
             'Content-Type': 'application/json',
             'x-functions-key': function_key  
         }
-        logging.info(f"[webbackend] calling orchestrator at: {ORCHESTRATOR_ENDPOINT}")        
+        logging.info(f"[webbackend] calling orchestrator at: {ORCHESTRATOR_ENDPOINT}")
+        logging.info(f"[webbackend] payload: {payload}")        
         response = requests.get(url, headers=headers, json=payload)
         logging.info(f"[webbackend] response: {response.text[:100]}...") 
         return response.text
