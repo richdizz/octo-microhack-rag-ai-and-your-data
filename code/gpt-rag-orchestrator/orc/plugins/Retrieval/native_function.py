@@ -126,7 +126,6 @@ class Retrieval:
                 logging.info(f"[sk_retrieval] finished generating question embeddings. {response_time} seconds")
                 azureSearchKey =await credential.get_token("https://search.azure.com/.default")
                 azureSearchKey = azureSearchKey.token
-                azureSearchKey = AZURE_SEARCH_API_KEY
                 logging.info(f"[sk_retrieval] querying azure ai search. search query: {search_query}")
                 # prepare body
                 body = {
@@ -161,8 +160,7 @@ class Retrieval:
 
                 headers = {
                     'Content-Type': 'application/json',
-                    'api-key': azureSearchKey
-                    #'Authorization': f'Bearer {azureSearchKey}'
+                    'Authorization': f'Bearer {azureSearchKey}'
                 }                    
 
                 if APIM_ENABLED:
@@ -175,8 +173,7 @@ class Retrieval:
                 else:
                     headers = {
                     'Content-Type': 'application/json',
-                    'api-key': azureSearchKey
-                    #'Authorization': f'Bearer {azureSearchKey}'
+                    'Authorization': f'Bearer {azureSearchKey}'
                 }
                     search_endpoint = f"https://{AZURE_SEARCH_SERVICE}.search.windows.net/indexes/{AZURE_SEARCH_INDEX}/docs/search?api-version={AZURE_SEARCH_API_VERSION}"
                 start_time = time.time()
@@ -198,7 +195,7 @@ class Retrieval:
                                         search_results.append(doc['filepath'] + ": " + doc['content'].strip() + "\n")
                                 else:
                                     logging.info(f"[sk_retrieval] No documents retrieved")                                        
-                    else:                
+                    else:               
                         async with session.post(search_endpoint, headers=headers, json=body) as response:
                             status_code = response.status
                             text=await response.text()
