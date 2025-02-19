@@ -126,7 +126,7 @@ class Retrieval:
                 logging.info(f"[sk_retrieval] finished generating question embeddings. {response_time} seconds")
                 azureSearchKey =await credential.get_token("https://search.azure.com/.default")
                 azureSearchKey = azureSearchKey.token
-                azureSearchKey = AZURE_SEARCH_API_KEY
+                # azureSearchKey = AZURE_SEARCH_API_KEY
                 logging.info(f"[sk_retrieval] querying azure ai search. search query: {search_query}")
                 # prepare body
                 body = {
@@ -198,7 +198,11 @@ class Retrieval:
                                         search_results.append(doc['filepath'] + ": " + doc['content'].strip() + "\n")
                                 else:
                                     logging.info(f"[sk_retrieval] No documents retrieved")                                        
-                    else:                
+                    else:         
+                        logging.info(f"search_endpoint: {search_endpoint}")
+                        logging.info(f"headers: {headers}")
+                        logging.info(f"body: {body}")
+                        logging.info(f"azureSearchKey: {azureSearchKey}")       
                         async with session.post(search_endpoint, headers=headers, json=body) as response:
                             status_code = response.status
                             text=await response.text()
