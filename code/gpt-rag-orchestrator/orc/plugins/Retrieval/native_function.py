@@ -160,8 +160,7 @@ class Retrieval:
 
                 headers = {
                     'Content-Type': 'application/json',
-                    'api-key': azureSearchKey
-                    #'Authorization': f'Bearer {azureSearchKey}'
+                    'Authorization': f'Bearer {azureSearchKey}'
                 }                    
 
                 if APIM_ENABLED:
@@ -174,8 +173,7 @@ class Retrieval:
                 else:
                     headers = {
                     'Content-Type': 'application/json',
-                    'api-key': azureSearchKey
-                    #'Authorization': f'Bearer {azureSearchKey}'
+                    'Authorization': f'Bearer {azureSearchKey}'
                 }
                     search_endpoint = f"https://{AZURE_SEARCH_SERVICE}.search.windows.net/indexes/{AZURE_SEARCH_INDEX}/docs/search?api-version={AZURE_SEARCH_API_VERSION}"
                 start_time = time.time()
